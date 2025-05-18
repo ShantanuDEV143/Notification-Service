@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Notification Service</title>
+</head>
+<body>
+  <h1>Send Notification</h1>
+  <form id="notifyForm">
+    <label>Title:</label><br />
+    <input type="text" name="title" required /><br />
+    <label>Message:</label><br />
+    <input type="text" name="message" required /><br />
+    <label>Recipient Email:</label><br />
+    <input type="email" name="recipient" required /><br /><br />
+    <button type="submit">Send</button>
+  </form>
+  <p id="status"></p>
+
+  <h2>All Notifications</h2>
+  <ul id="notificationList"></ul>
+
+  <script>
+    const form = document.getElementById('notifyForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData);
+
+      const res = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+
+      document.getElementById('status').textContent = "Notification sent!";
+      form.reset();
+      loadNotifications();
+    });
+
+    async function loadNotifications() {
+      const res = await fetch('/api/notifications');
+      const data = await res.json();
+
+      const list = document.getElementById('notificationList');
+      list.innerHTML = '';
+
+      data.forEach(n => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <strong>${n.title}</strong> - ${n.message}
+          <em> (${n.recipient})</em>
+          <button onclick="toggleRead('${n._id}', ${n.read})">
+            Mark as ${n.read ? 'Unread' : 'Read'}
+          </button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    async function toggleRead(id, read) {
+      await fetch('/api/notifications/' + id, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ read: !read })
+      });
+      loadNotifications();
+    }
+
+    loadNotifications();
+  </script>
+</body>
+</html>
