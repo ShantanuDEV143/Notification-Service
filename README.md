@@ -22,7 +22,7 @@ A simple RESTful API built with Node.js, Express, and MongoDB to create, retriev
 
 ---
 
-## 📁 Project Structure
+# Project Structure
 notification-service/
 ├── models/
 │ ├── Notification.js
